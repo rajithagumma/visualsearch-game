@@ -755,7 +755,35 @@
         RTten = 0,
         RTfifteen = 0,
         RTtwenty = 0;
-      function generaltype(
+        let general = []; 
+        function generaltype(...args) {
+          for (let i = 0; i < 99; i++) {
+            const key = "c" + (i + 1);
+            if (typeof args[i] === "string" && typeof window[args[i]] !== "undefined") {
+              this[key] = window[args[i]]; // e.g., converts "target" to 2
+            } else {
+              this[key] = args[i];
+            }
+          }
+          this.selected = args[99]; // selected
+        }
+
+        fetch("stimuli_output_array.json")
+          .then(response => response.json())
+          .then(data => {
+            general = data.map(entry => new generaltype(...entry));
+            console.log("All generaltype objects:", general);
+            console.log("First object, c4:", general[0].c4);
+            console.log("First object selected:", general[0].selected);
+
+            // ✅ Start the block only after data is loaded
+            block_block1.start();
+          })
+          .catch(error => {
+            console.error("Error loading JSON:", error);
+          });
+
+     /* function generaltype(
         a,
         b,
         d,
@@ -4583,7 +4611,7 @@
             -100,
             0
           ),
-        ],
+        ],*/
         selectedoncecount = [0, 0],
         task_search = {
           step: 1,
@@ -4746,6 +4774,66 @@
                   general[tablerow].c62,
                   general[tablerow].c63
                 );
+                psy_add_centered_bitmap_db(
+                  general[tablerow].c64,
+                  general[tablerow].c65,
+                  general[tablerow].c66
+                );
+                psy_add_centered_bitmap_db(
+                  general[tablerow].c67,
+                  general[tablerow].c68,
+                  general[tablerow].c69
+                );
+                psy_add_centered_bitmap_db(
+                  general[tablerow].c70,
+                  general[tablerow].c71,
+                  general[tablerow].c72
+                );
+                psy_add_centered_bitmap_db(
+                  general[tablerow].c73,
+                  general[tablerow].c74,
+                  general[tablerow].c75
+                );
+                psy_add_centered_bitmap_db(
+                  general[tablerow].c76,
+                  general[tablerow].c77,
+                  general[tablerow].c78
+                );
+                psy_add_centered_bitmap_db(
+                  general[tablerow].c79,
+                  general[tablerow].c80,
+                  general[tablerow].c81
+                );
+                psy_add_centered_bitmap_db(
+                  general[tablerow].c82,
+                  general[tablerow].c83,
+                  general[tablerow].c84
+                );
+                psy_add_centered_bitmap_db(
+                  general[tablerow].c85,
+                  general[tablerow].c86,
+                  general[tablerow].c87
+                );
+                psy_add_centered_bitmap_db(
+                  general[tablerow].c88,
+                  general[tablerow].c89,
+                  general[tablerow].c90
+                );
+                psy_add_centered_bitmap_db(
+                  general[tablerow].c91,
+                  general[tablerow].c92,
+                  general[tablerow].c93
+                );
+                psy_add_centered_bitmap_db(
+                  general[tablerow].c94,
+                  general[tablerow].c95,
+                  general[tablerow].c96
+                );
+                psy_add_centered_bitmap_db(
+                  general[tablerow].c97,
+                  general[tablerow].c98,
+                  general[tablerow].c99
+                );
                 psy_draw_all_db();
                 // psy_keyboard(possiblekeys, 1, 0, 4e3);
                 psy_wait_keylist(0, [89, 78], 4000);
@@ -4828,6 +4916,19 @@
                 psy_clear_stimuli1(22);
                 psy_clear_stimuli1(23);
                 psy_clear_stimuli1(24);
+                psy_clear_stimuli1(25);
+                psy_clear_stimuli1(26);
+                psy_clear_stimuli1(27);
+                psy_clear_stimuli1(28);
+                psy_clear_stimuli1(29);
+                psy_clear_stimuli1(30);
+                psy_clear_stimuli1(31);
+                psy_clear_stimuli1(32);
+                psy_clear_stimuli1(33);
+                psy_clear_stimuli1(34);
+                psy_clear_stimuli1(35);
+                psy_clear_stimuli1(36);
+            
                 psy_draw_all_db();
                 x = 1;
                 task_search.run();
@@ -4917,6 +5018,18 @@
                 psy_clear_stimuli1(24);
                 psy_clear_stimuli1(25);
                 psy_clear_stimuli1(26);
+                psy_clear_stimuli1(27);
+                psy_clear_stimuli1(28);
+                psy_clear_stimuli1(29);
+                psy_clear_stimuli1(30);
+                psy_clear_stimuli1(31);
+                psy_clear_stimuli1(32);
+                psy_clear_stimuli1(33);
+                psy_clear_stimuli1(34);
+                psy_clear_stimuli1(35);
+                psy_clear_stimuli1(36);
+                psy_clear_stimuli1(37);
+                psy_clear_stimuli1(38);
                 psy_draw_all_db();
                 x = 1;
                 task_search.run();
@@ -4967,6 +5080,18 @@
                 psy_clear_stimuli1(21);
                 psy_clear_stimuli1(22);
                 psy_clear_stimuli1(23);
+                psy_clear_stimuli1(24);
+                psy_clear_stimuli1(25);
+                psy_clear_stimuli1(26);
+                psy_clear_stimuli1(27);
+                psy_clear_stimuli1(28);
+                psy_clear_stimuli1(29);
+                psy_clear_stimuli1(30);
+                psy_clear_stimuli1(31);
+                psy_clear_stimuli1(32);
+                psy_clear_stimuli1(33);
+                psy_clear_stimuli1(34);
+                psy_clear_stimuli1(35);
                 psy_draw_all_db();
                 task_search.run();
                 break;

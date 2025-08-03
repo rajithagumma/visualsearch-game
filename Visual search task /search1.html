@@ -504,7 +504,7 @@
         return psy_stimuli1_end;
       }
       function psy_add_centered_bitmap_db(a, b, d) {
-        console.log(`Adding bitmap: ID=${a}, Index=${psy_stimuli1_end}`);
+        // console.log(`Adding bitmap: ID=${a}, Index=${psy_stimuli1_end}`);
         psy_stimuli1[psy_stimuli1_end].type = 1;
         psy_stimuli1[psy_stimuli1_end].on = 1;
         psy_stimuli1[psy_stimuli1_end].bitmap = a;
@@ -4895,6 +4895,7 @@
                 break;
               case 25:
                 task_search.step++,
+                console.log(current_block+ " " + general[tablerow].c1 + " " + general[tablerow].c2 + " " + general[tablerow].c3 + " " + keystatus.status + " " + keystatus.time);
                   addoutput(
                     current_block +
                       " " +

@@ -232,7 +232,6 @@
               psy_readkey.expectkey = false;
               psy_readkey.stop();
             } else {
-              console.log("⏳ Ignoring non-spacebar in block_messagenumber1");
               inkeypress--; 
             }
           }
@@ -778,9 +777,6 @@
           .then(response => response.json())
           .then(data => {
             general = data.map(entry => new generaltype(...entry));
-            console.log("All generaltype objects:", general);
-            console.log("First object, c4:", general[0].c4);
-            console.log("First object selected:", general[0].selected);
 
             // ✅ Start the block only after data is loaded
             block_block1.start();
@@ -1277,7 +1273,6 @@
                 break;
               case 25:
                 task_search.step++,
-                console.log(current_block+ " " + general[tablerow].c1 + " " + general[tablerow].c2 + " " + general[tablerow].c3 + " " + keystatus.status + " " + keystatus.time);
                   addoutput(
                     current_block +
                       " " +
@@ -1313,7 +1308,6 @@
                 break;
               case 2:
                 if (keystatus.status === 1) {
-                  console.log("keystatus.status = ", keystatus.status);
                   block_messagenumber1.step++;
                   eval("blocks.run()");
                 } else {
@@ -1332,7 +1326,6 @@
             block_practice_trials.step = 1;
             // psy_clear_stimulus_counters_db();
             alert("You will now do some practice trials. Press any key to continue.");
-            console.log("block_practice_trials started");
             setTimeout(() => blocks.run(), 1000);          }
         }
         block_block1 = {
@@ -1365,10 +1358,6 @@
                 break;
               case 2:
                 block_block1.step++;
-                console.log(
-                  "block_block1.trial_counter_per_task[0] = ",
-                  block_block1.trial_counter_per_task[0]
-                );
                 block_block1.trial_counter_per_task[0]--;
                 if (
                   0 == block_block1.trial_counter_per_task[0] ||

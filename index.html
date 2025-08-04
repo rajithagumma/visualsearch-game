@@ -224,7 +224,7 @@
         inkeypress++;
 
         if (psy_readkey.expectkey && inkeypress === 1) {
-          if (current_block !== "block_block1") {
+          if (current_block !== "block_block1" && current_block!=="block_practice_trials") {
             if (a.keyCode === 32) {
               keystatus.time = new Date().getTime() - psy_readkey.starttime;
               keystatus.key = a.keyCode;
@@ -236,7 +236,7 @@
             }
           }
 
-          else if (current_block === "block_block1") {
+          else if (current_block === "block_block1" || current_block === "block_practice_trials") {
             if (a.keyCode === 89 || a.keyCode === 78) {
               keystatus.time = new Date().getTime() - psy_readkey.starttime;
               keystatus.key = a.keyCode;
@@ -565,6 +565,7 @@
         psy_stimuli1[psy_stimuli1_end].bitmap = a;
         b =
           b == PSY_CENTRAL
+
             ? psy_screen_center_x - psy_bitmaps[a - 1].width / 2
             : b + psy_screen_x_offset - psy_bitmaps[a - 1].width / 2;
         d =
@@ -622,6 +623,7 @@
         TRIAL_SELECTION_FIXED_SEQUENCE = 2,
         TRIAL_SELECTION_REPEAT_ON_ERROR = 3,
         TRIAL_SELECTION_ONCE = 4,
+        PRACTICE_TRIALS=5,
         error_status;
       trial_counter_per_task = [];
       task_probability = [];
@@ -748,6 +750,8 @@
         frame = 9,
         therewasnone = 10,
         toolate = 11,
+        correct=12,
+        tryagain=13,
         arial = 0,
         x = 0,
         RTfive = 0,
@@ -792,6 +796,7 @@
           current_trial: -1,
           taskname: "task_search",
           tasknumber: 1,
+          practice_count:0,
           start: function (a) {
             task_search.trial_selection = a;
             task_search.step = 1;
@@ -832,6 +837,18 @@
                   task_search.current_trial = tablerow;
                   selectedoncecount[task_search.tasknumber]++;
                   general[tablerow].selected = 1;
+                } 
+                if (task_search.trial_selection == PRACTICE_TRIALS) {
+                  console.log("practice count",task_search.practice_count)
+                  let practice_array = [32, 24, 5, 53];
+                  let practice_count = task_search.practice_count;
+
+                  if (practice_count < practice_array.length) {
+                    tablerow = practice_array[practice_count];
+                    general[tablerow].selected = 1;
+                    task_search.current_trial = tablerow;
+                    task_search.practice_count++;  // increment global count
+                  }
                 }
                 error_status = 0;
                 possiblekeys = [32];
@@ -1010,7 +1027,6 @@
                 psy_draw_all_db();
                 // psy_keyboard(possiblekeys, 1, 0, 4e3);
                 psy_wait_keylist(0, [89, 78], 4000);
-
                 break;
               case 4:
                 x = 0;
@@ -1026,7 +1042,6 @@
                   task_search.step = 11;
                 }
                 else{
-                  if (keystatus.status==78){
                    if (keystatus.status == 78) {
                       if (general[tablerow].c2 == 1) {
                         task_search.step = 14;
@@ -1034,14 +1049,19 @@
                         task_search.step = 19;
                       }
                     }
-                  }
                 }
                 eval("task_search.run()");
                 
                 break;
               case 6:
                 task_search.step++;
-                psy_add_centered_bitmap_db(therewasnone, 0,220);
+                if (current_block==="block_practice_trials"){
+                  psy_add_centered_bitmap_db(tryagain,0,220);
+                  task_search.practice_count--;
+                  block_practice_trials.trial_counter--;
+                }else{
+                    psy_add_centered_bitmap_db(therewasnone, 0,220);
+                }
                 psy_draw_all_db();
                 psy_delay(2e3);
                 break;
@@ -1050,7 +1070,7 @@
                 psy_clear_stimuli1(34);
                 psy_draw_all_db();
                 psy_delay(500);
-                break;
+                break;block_pra
               case 8:
                 task_search.step++;
                 psy_add_centered_bitmap_db(mask1, PSY_CENTRAL, PSY_CENTRAL);
@@ -1128,7 +1148,13 @@
                 break;
               case 14:
                 task_search.step++;
-                psy_add_centered_bitmap_db(toolate, 0,220);
+                if (current_block==="block_practice_trials"){
+                  psy_add_centered_bitmap_db(tryagain,0,220);
+                  task_search.practice_count--;
+                  block_practice_trials.trial_counter--;
+                }else{
+                  psy_add_centered_bitmap_db(toolate, 0,220);
+                }
                 psy_draw_all_db();
                 psy_add_centered_bitmap_db(
                   frame,
@@ -1212,6 +1238,16 @@
                 break;
               case 20:
                 task_search.step++;
+                if (current_block==="block_practice_trials"){
+                  if (x===0){
+                    psy_add_centered_bitmap_db(correct,0,220);
+                    psy_draw_all_db();
+                    psy_delay(2e3);
+                    psy_clear_stimuli1(34);
+                    break;
+
+                  }
+                }
                 0 != x && (task_search.step = 24);
                 eval("task_search.run()");
                 break;
@@ -1321,12 +1357,38 @@
         block_practice_trials={
           blockname:"block_practice_trials",
           step:1,
-          trial_counter:0,
+          trial_counter:1,
           start: function(){
             block_practice_trials.step = 1;
-            // psy_clear_stimulus_counters_db();
-            alert("You will now do some practice trials. Press any key to continue.");
-            setTimeout(() => blocks.run(), 1000);          }
+            current_task="block_practice_trials";
+            psy_clear_stimulus_counters_db();
+            block_practice_trials.run();
+                     
+          },
+          run: function(){
+            current_block= block_practice_trials.blockname;
+            console.log("current block",current_block)
+            switch (block_practice_trials.step){
+              case 1:
+                block_practice_trials.step++;
+                psy_clear_screen_db();
+                task_search.start(PRACTICE_TRIALS);
+                break;
+              case 2:
+                if (block_practice_trials.trial_counter<4){
+                  block_practice_trials.step-=1;
+                  console.log("trial_counter",block_practice_trials.trial_counter)
+                  block_practice_trials.trial_counter++;
+                  eval("block_practice_trials.run()");
+                }
+                else{
+                    block_practice_trials.step++
+                    eval("blocks.run()");
+                }
+                break;
+              
+            }
+          }
         }
         block_block1 = {
           blockname: "block_block1",
@@ -1345,6 +1407,7 @@
           },
           run: function () {
             current_block = block_block1.blockname;
+            console.log("current block",current_block)
             switch (block_block1.step) {
               case 1:
                 block_block1.step++;

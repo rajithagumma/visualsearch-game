@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>PsyToolkit run experiment</title>
+    <title>Visual Search Game</title>
     <style>
         body{
             height: 100vh;
@@ -17,7 +17,6 @@
         }
     </style>
   </head>
-
   <body onload="whenloaded()">
     <script>
       function whenloaded() {
@@ -840,7 +839,7 @@
                 } 
                 if (task_search.trial_selection == PRACTICE_TRIALS) {
                   console.log("practice count",task_search.practice_count)
-                  let practice_array = [32, 24, 5, 53];
+                  let practice_array = [32, 24, 53, 6];
                   let practice_count = task_search.practice_count;
 
                   if (practice_count < practice_array.length) {
@@ -1308,7 +1307,8 @@
                 psy_delay(1e3);
                 break;
               case 25:
-                task_search.step++,
+                task_search.step++;
+                if (current_block!="block_practice_trials"){
                   addoutput(
                     current_block +
                       " " +
@@ -1321,7 +1321,8 @@
                       keystatus.status +
                       " " +
                       keystatus.time
-                  ),
+                  )
+                }
                   eval(current_block + ".run()");
             }
           },
@@ -1403,17 +1404,18 @@
             current_task = "block_block1";
             block_block1.trial_counter_per_task[0] = 25;
             psy_clear_stimulus_counters_db();
+            console.log("current block")
             block_block1.run();
           },
           run: function () {
             current_block = block_block1.blockname;
-            console.log("current block",current_block)
             switch (block_block1.step) {
               case 1:
                 block_block1.step++;
                 psy_clear_screen_db();
                 block_block1.max_trials_in_block = 999999;
                 block_block1.criteria_fullfilled = 1;
+                console.log(block_block1.trial_counter_per_task[0]);
                 0 < block_block1.criteria_fullfilled &&
                 block_block1.trial_counter <= block_block1.max_trials_in_block
                   ? task_search.start(TRIAL_SELECTION_ONCE)

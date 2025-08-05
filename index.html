@@ -627,7 +627,6 @@
           psy_stimuli1[psy_stimuli1_end].rect.y = y;
           psy_stimuli1[psy_stimuli1_end].rect.width = scaledWidth;
           psy_stimuli1[psy_stimuli1_end].rect.height = scaledHeight;
-          
         }
 
         psy_stimuli1_n++;
@@ -806,6 +805,8 @@
         toolate = 11,
         correct = 12,
         tryagain = 13,
+        practice = 14,
+        completion = 15,
         arial = 0,
         x = 0,
         RTfive = 0,
@@ -1291,12 +1292,18 @@
               case 20:
                 task_search.step++;
                 if (current_block === "block_practice_trials") {
-                  if (x === 0 && (keystatus.status == 89 || keystatus.status == 78)) {
+                  if (
+                    x === 0 &&
+                    (keystatus.status == 89 || keystatus.status == 78)
+                  ) {
                     psy_add_centered_bitmap_db(correct, 0, 220);
                     psy_draw_all_db();
                     psy_delay(2e3);
                     psy_clear_stimuli1(34);
                     break;
+                  } else{
+                    task_search.practice_count--;
+                    block_practice_trials.trial_counter--;
                   }
                 }
                 0 != x && (task_search.step = 24);
@@ -1406,6 +1413,37 @@
             }
           },
         }),
+        // (block_practice_trials = {
+        //   blockname: "block_practice_trials",
+        //   step: 1,
+        //   trial_counter: 1,
+        //   start: function () {
+        //     block_practice_trials.step = 1;
+        //     current_task = "block_practice_trials";
+        //     psy_clear_stimulus_counters_db();
+        //     block_practice_trials.run();
+        //   },
+        //   run: function () {
+        //     current_block = block_practice_trials.blockname;
+        //     switch (block_practice_trials.step) {
+        //       case 1:
+        //         block_practice_trials.step++;
+        //         psy_clear_screen_db();
+        //         task_search.start(PRACTICE_TRIALS);
+        //         break;
+        //       case 2:
+        //         if (block_practice_trials.trial_counter < 4) {
+        //           block_practice_trials.step -= 1;
+        //           block_practice_trials.trial_counter++;
+        //           eval("block_practice_trials.run()");
+        //         } else {
+        //           block_practice_trials.step++;
+        //           eval("blocks.run()");
+        //         }
+        //         break;
+        //     }
+        //   },
+        // });
         (block_practice_trials = {
           blockname: "block_practice_trials",
           step: 1,
@@ -1419,24 +1457,51 @@
           run: function () {
             current_block = block_practice_trials.blockname;
             switch (block_practice_trials.step) {
-              case 1:
+              case 1: // Show intro image for 4 seconds
                 block_practice_trials.step++;
                 psy_clear_screen_db();
-                task_search.start(PRACTICE_TRIALS);
-                break;
-              case 2:
-                if (block_practice_trials.trial_counter < 4) {
-                  block_practice_trials.step -= 1;
-                  block_practice_trials.trial_counter++;
-                  eval("block_practice_trials.run()");
-                } else {
+                psy_add_centered_bitmap_db(14, PSY_CENTRAL, PSY_CENTRAL); // Start message image
+                psy_draw_all_db();
+                setTimeout(() => {
                   block_practice_trials.step++;
-                  eval("blocks.run()");
+                  block_practice_trials.run();
+                }, 4000);
+                break;
+
+              case 2: // Start the first trial
+                psy_clear_screen_db();
+                task_search.start(PRACTICE_TRIALS);
+                block_practice_trials.step++;
+                break;
+
+              case 3: // Repeat for 4 practice trials
+                if (block_practice_trials.trial_counter <= 4) {
+                  block_practice_trials.trial_counter++;
+                  block_practice_trials.step = 2;
+                  block_practice_trials.run();
+                } else {
+                  block_practice_trials.step = 4;
+                  block_practice_trials.run();
                 }
+                break;
+
+              case 4: // Show end image for 4 seconds
+                psy_clear_screen_db();
+                psy_add_centered_bitmap_db(15, PSY_CENTRAL, PSY_CENTRAL); // Completion image
+                psy_draw_all_db();
+                setTimeout(() => {
+                  block_practice_trials.step++;
+                  block_practice_trials.run();
+                }, 4000);
+                break;
+
+              case 5: // Proceed to actual test block
+                eval("blocks.run()");
                 break;
             }
           },
         });
+
       block_block1 = {
         blockname: "block_block1",
         step: 1,
@@ -1819,8 +1884,6 @@
           // }else{
           //   psy_draw_all_db();
           // }
-          
-          
         } else {
           resizeCanvasToFullscreen();
         }

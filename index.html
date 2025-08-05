@@ -1301,10 +1301,7 @@
                     psy_delay(2e3);
                     psy_clear_stimuli1(34);
                     break;
-                  } else{
-                    task_search.practice_count--;
-                    block_practice_trials.trial_counter--;
-                  }
+                  } 
                 }
                 0 != x && (task_search.step = 24);
                 eval("task_search.run()");
@@ -1475,7 +1472,7 @@
                 break;
 
               case 3: // Repeat for 4 practice trials
-                if (block_practice_trials.trial_counter < 4) {
+                if (block_practice_trials.trial_counter <= 4) {
                   block_practice_trials.trial_counter++;
                   block_practice_trials.step = 2;
                   block_practice_trials.run();

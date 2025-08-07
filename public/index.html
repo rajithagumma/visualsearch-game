@@ -1462,7 +1462,7 @@
                 setTimeout(() => {
                   block_practice_trials.step++;
                   block_practice_trials.run();
-                }, 3000);
+                }, 1000);
                 break;
 
               case 2: // Start the first trial
@@ -1489,7 +1489,7 @@
                 setTimeout(() => {
                   block_practice_trials.step++;
                   block_practice_trials.run();
-                }, 3000);
+                }, 4000);
                 break;
 
               case 5: // Proceed to actual test block
@@ -1938,7 +1938,7 @@
           .then((data) => {
             loadAllBitmaps(data, () => {
               experimentstarted = true;
-              setTimeout("blocks.run()", 1e3);
+              setTimeout("blocks.run()", 500);
             });
           });
       }

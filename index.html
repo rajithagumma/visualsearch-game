@@ -31,15 +31,16 @@
   <body onload="whenloaded()">
     <script>
       function whenloaded() {
-        var xxx;
-        xxx = document.getElementById("startbutton");
-        xxx.textContent =
-          "Click this button to start the experiment in the black box above this button";
-        xxx.disabled = false;
-        var tmpimg;
-        tmpimg = document.getElementById("experimentloadingimg");
-        tmpimg.parentNode.removeChild(tmpimg);
-        // main();
+        // var xxx;
+        // xxx = document.getElementById("startbutton");
+        // xxx.textContent =
+        //   "Click this button to start the experiment in the black box above this button";
+        // xxx.disabled = false;
+        // var tmpimg;
+        // tmpimg = document.getElementById("experimentloadingimg");
+        // tmpimg.parentNode.removeChild(tmpimg);
+        main();
+
       }
     </script>
     <center>
@@ -68,7 +69,7 @@
         ></canvas>
       </div>
     </center>
-    <br /><button
+    <!-- <br /><button
       id="startbutton"
       disabled="true"
       onClick="startbutton.disabled=true;main();return(false);"
@@ -77,7 +78,7 @@
     ><img
       id="experimentloadingimg"
       src="http://psytoolkit.gla.ac.uk/loading.gif"
-    /><br />
+    /><br /> -->
     <script>
       var MAXSPRITES = 100,
         MAXBITMAPS = 1e3,
@@ -99,6 +100,7 @@
         psy_exp_start_time = 0,
         psy_exp_current_time = 0,
         tablerow = 0;
+        practice_instruction=0;
       const BASE_WIDTH = 800;
       const BASE_HEIGHT = 600;
 
@@ -257,8 +259,7 @@
 
         if (psy_readkey.expectkey && inkeypress === 1) {
           if (
-            current_block !== "block_block1" &&
-            current_block !== "block_practice_trials"
+            current_block !== "block_block1" && practice_instruction==1
           ) {
             if (a.keyCode === 32) {
               keystatus.time = new Date().getTime() - psy_readkey.starttime;
@@ -270,8 +271,7 @@
               inkeypress--;
             }
           } else if (
-            current_block === "block_block1" ||
-            current_block === "block_practice_trials"
+            current_block === "block_block1" || current_block==="block_practice_trials"
           ) {
             if (a.keyCode === 89 || a.keyCode === 78) {
               keystatus.time = new Date().getTime() - psy_readkey.starttime;
@@ -1397,11 +1397,13 @@
             switch (block_messagenumber1.step) {
               case 1:
                 block_messagenumber1.step++;
+                practice_instruction=1;
                 psy_wait(aims, 32);
                 break;
               case 2:
                 if (keystatus.status === 1) {
                   block_messagenumber1.step++;
+                  practice_instruction=0;
                   eval("blocks.run()");
                 } else {
                   block_messagenumber1.step = 1;
@@ -1410,43 +1412,13 @@
             }
           },
         }),
-        // (block_practice_trials = {
-        //   blockname: "block_practice_trials",
-        //   step: 1,
-        //   trial_counter: 1,
-        //   start: function () {
-        //     block_practice_trials.step = 1;
-        //     current_task = "block_practice_trials";
-        //     psy_clear_stimulus_counters_db();
-        //     block_practice_trials.run();
-        //   },
-        //   run: function () {
-        //     current_block = block_practice_trials.blockname;
-        //     switch (block_practice_trials.step) {
-        //       case 1:
-        //         block_practice_trials.step++;
-        //         psy_clear_screen_db();
-        //         task_search.start(PRACTICE_TRIALS);
-        //         break;
-        //       case 2:
-        //         if (block_practice_trials.trial_counter < 4) {
-        //           block_practice_trials.step -= 1;
-        //           block_practice_trials.trial_counter++;
-        //           eval("block_practice_trials.run()");
-        //         } else {
-        //           block_practice_trials.step++;
-        //           eval("blocks.run()");
-        //         }
-        //         break;
-        //     }
-        //   },
-        // });
         (block_practice_trials = {
           blockname: "block_practice_trials",
           step: 1,
           trial_counter: 1,
           start: function () {
             block_practice_trials.step = 1;
+            counter=1;
             current_task = "block_practice_trials";
             psy_clear_stimulus_counters_db();
             block_practice_trials.run();
@@ -1456,23 +1428,30 @@
             switch (block_practice_trials.step) {
               case 1: // Show intro image for 4 seconds
                 block_practice_trials.step++;
-                psy_clear_screen_db();
-                psy_add_centered_bitmap_db(14, PSY_CENTRAL, PSY_CENTRAL); // Start message image
-                psy_draw_all_db();
-                setTimeout(() => {
-                  block_practice_trials.step++;
-                  block_practice_trials.run();
-                }, 1000);
+                practice_instruction=1;
+                psy_wait(practice,32);
                 break;
-
-              case 2: // Start the first trial
-                psy_clear_screen_db();
-                task_search.start(PRACTICE_TRIALS);
-                block_practice_trials.step++;
+              case 2:
+                if (keystatus.status === 1 && counter==1 ) {
+                  block_practice_trials.step++;
+                  practice_instruction=0;
+                  console.log("step2",block_practice_trials.step);
+                  psy_clear_screen_db();
+                  task_search.start(PRACTICE_TRIALS);
+                  counter++
+                } else if (counter!=1){
+                  psy_clear_screen_db();
+                  task_search.start(PRACTICE_TRIALS);
+                  block_practice_trials.step++;
+                }
+                else {
+                  block_practice_trials.step = 1;
+                }
                 break;
 
               case 3: // Repeat for 4 practice trials
-                if (block_practice_trials.trial_counter <= 4) {
+                console.log(block_practice_trials.step);
+                if (block_practice_trials.trial_counter <4) {
                   block_practice_trials.trial_counter++;
                   block_practice_trials.step = 2;
                   block_practice_trials.run();
@@ -1483,17 +1462,20 @@
                 break;
 
               case 4: // Show end image for 4 seconds
-                psy_clear_screen_db();
-                psy_add_centered_bitmap_db(15, PSY_CENTRAL, PSY_CENTRAL); // Completion image
-                psy_draw_all_db();
-                setTimeout(() => {
-                  block_practice_trials.step++;
-                  block_practice_trials.run();
-                }, 4000);
+                block_practice_trials.step++;
+                practice_instruction=1;
+                psy_wait(completion,32);
                 break;
 
               case 5: // Proceed to actual test block
-                eval("blocks.run()");
+                if (keystatus.status===1){
+                    block_practice_trials.step++;
+                    eval("blocks.run()");
+                }
+                else{
+                  block_practice_trials.step=4;
+                  block_practice_trials.run();
+                }
                 break;
             }
           },
@@ -1912,11 +1894,7 @@
       }
       function main() {
         c.focus();
-        psy_screen_width = window.innerWidth;
-        psy_screen_height = window.innerHeight;
-        psy_screen_center_x = psy_screen_width / 2;
-        psy_screen_center_y = psy_screen_height / 2;
-        psy_set_coordinate_system("c");
+        resizeCanvasToFullscreen();
         psy_exp_start_time = psy_exp_current_time = new Date().getTime();
         psy_mouse_visibility(0);
         psy_load_font("Arial", 20);
@@ -1931,14 +1909,12 @@
           canvas.msRequestFullscreen();
         }
 
-        var startbutton = document.getElementById("startbutton");
-        startbutton.style.display = "none";
         fetch("bitmaps.json")
           .then((response) => response.json())
           .then((data) => {
             loadAllBitmaps(data, () => {
               experimentstarted = true;
-              setTimeout("blocks.run()", 500);
+              blocks.run();
             });
           });
       }

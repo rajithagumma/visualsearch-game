@@ -80,6 +80,46 @@
       src="http://psytoolkit.gla.ac.uk/loading.gif"
     /><br /> -->
     <script>
+      async function sendScore(score,comment) {
+        try {
+          const ltik = new URLSearchParams(window.location.search).get("ltik");
+          if (!ltik) throw new Error("LTIK token missing from URL");
+
+          // Ensure score is a valid number between 0 and 100
+          const numericScore = Number(score);
+          if (isNaN(numericScore)) {
+            throw new Error("Score must be a valid number");
+          }
+          
+          // Clamp score between 0 and 100
+          const clampedScore = Math.max(0, Math.min(100, numericScore));
+
+          console.log("Sending score:", clampedScore, "with LTIK:", ltik);
+
+          const response = await fetch(`/grade?ltik=${ltik}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ grade: clampedScore,comment }),
+          });
+
+          console.log("Response status:", response.status);
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Server error response:", errorText);
+            throw new Error(`Network response was not ok: ${response.status} - ${errorText}`);
+          }
+
+          const data = await response.json();
+          console.log("✅ Score submitted successfully:", data);
+          return data;
+        } catch (error) {
+          console.error("❌ Error submitting score:", error);
+          throw error;
+        }
+      }
       var MAXSPRITES = 100,
         MAXBITMAPS = 1e3,
         PSY_CENTRAL = -99999,
@@ -807,6 +847,8 @@
         tryagain = 13,
         practice = 14,
         completion = 15,
+        presentmessage=16,
+        absentmessage=17,
         arial = 0,
         x = 0,
         RTfive = 0,
@@ -909,7 +951,9 @@
                 psy_add_centered_bitmap_db(fixpoint, PSY_CENTRAL, PSY_CENTRAL);
                 psy_draw_all_db();
                 psy_delay(100);
+               
                 break;
+                
               case 2:
                 task_search.step++;
                 psy_clear_stimuli1(1);
@@ -917,6 +961,19 @@
                 psy_delay(400);
                 break;
               case 3:
+                 if (current_block==="block_practice_trials"){
+                  if (general[tablerow].c2===1){
+                    psy_add_centered_bitmap_db(presentmessage,0,-230);
+                    psy_add_centered_bitmap_db(
+                  frame,
+                  general[tablerow].c5,
+                  general[tablerow].c6
+                );
+                  }
+                  else{
+                    psy_add_centered_bitmap_db(absentmessage,0,-230);
+                  }
+                }
                 task_search.step++;
                 psy_add_centered_bitmap_db(
                   general[tablerow].c4,
@@ -1079,8 +1136,11 @@
                   general[tablerow].c99
                 );
                 psy_draw_all_db();
-                // psy_keyboard(possiblekeys, 1, 0, 4e3);
-                psy_wait_keylist(0, [89, 78], 4000);
+                if (current_block==="block_practice_trials"){
+                  psy_wait_keylist(0,[89, 78],99999999);
+                }else{
+                  psy_wait_keylist(0, [89, 78], 4000);
+                }
                 break;
               case 4:
                 x = 0;
@@ -1120,11 +1180,14 @@
                 break;
               case 7:
                 task_search.step++;
-                psy_clear_stimuli1(34);
+                // psy_clear_stimuli1(34);
                 psy_draw_all_db();
                 psy_delay(500);
+                if (current_block === "block_practice_trials"){
+                  psy_clear_stimuli1(2);
+                  psy_clear_stimuli1(35);
+                }
                 break;
-                block_pra;
               case 8:
                 task_search.step++;
                 psy_add_centered_bitmap_db(mask1, PSY_CENTRAL, PSY_CENTRAL);
@@ -1225,9 +1288,15 @@
                 break;
               case 15:
                 task_search.step++;
-                psy_clear_stimuli1(34);
+                psy_clear_stimuli1(35);
                 psy_draw_all_db();
                 psy_delay(500);
+                if (current_block==="block_practice_trials"){
+                  psy_clear_stimuli1(2);
+                  psy_clear_stimuli1(36);
+                }else{
+                    psy_clear_stimuli1(34);
+                }
                 break;
               case 16:
                 task_search.step++;
@@ -1299,7 +1368,13 @@
                     psy_add_centered_bitmap_db(correct, 0, 220);
                     psy_draw_all_db();
                     psy_delay(2e3);
-                    psy_clear_stimuli1(34);
+                    psy_clear_stimuli1(2);
+                    if (general[tablerow].c2 == 1){
+                      psy_clear_stimuli1(36);
+
+                    }else{
+                      psy_clear_stimuli1(35);
+                    }
                     break;
                   } 
                 }
@@ -1308,6 +1383,7 @@
                 break;
               case 21:
                 task_search.step++;
+                // psy_clear_stimuli1(2);
                 psy_add_centered_bitmap_db(mask1, PSY_CENTRAL, PSY_CENTRAL);
                 psy_draw_all_db();
                 psy_delay(100);
@@ -1435,7 +1511,6 @@
                 if (keystatus.status === 1 && counter==1 ) {
                   block_practice_trials.step++;
                   practice_instruction=0;
-                  console.log("step2",block_practice_trials.step);
                   psy_clear_screen_db();
                   task_search.start(PRACTICE_TRIALS);
                   counter++
@@ -1653,32 +1728,34 @@
               RTthirtytwo1 = a1 > 0 ? Math.round(b1 / a1) : 0;
               var a32 = a;
               var a321 = a1;
-              // console.log(
-              //   "RTfour = ",
-              //   RTfour,
-              //   a4,
-              //   "RTeight = ",
-              //   RTeight,
-              //   a8,
-              //   "RTsixteen = ",
-              //   RTsixteen,
-              //   a16,
-              //   "RTthirtytwo = ",
-              //   RTthirtytwo,
-              //   a32,
-              //   "RTfour1 = ",
-              //   RTfour1,
-              //   a41,
-              //   "RTeight1 = ",
-              //   RTeight1,
-              //   a81,
-              //   "RTsixteen1 = ",
-              //   RTsixteen1,
-              //   a161,
-              //   "RTthirtytwo1 = ",
-              //   RTthirtytwo1,
-              //   a321
-              // );
+              const maxRT = Math.max(RTfour, RTeight);
+              let normalizedScore;
+              
+              if (maxRT <= 0) {
+                // No valid reaction time recorded
+                normalizedScore = 0;
+              } else if (maxRT <= 500) {
+                // Excellent performance: 90-100 points
+                normalizedScore = Math.round(90 + (500 - maxRT) / 500 * 10);
+              } else if (maxRT <= 1000) {
+                // Good performance: 70-90 points  
+                normalizedScore = Math.round(70 + (1000 - maxRT) / 500 * 20);
+              } else if (maxRT <= 2000) {
+                // Average performance: 40-70 points
+                normalizedScore = Math.round(40 + (2000 - maxRT) / 1000 * 30);
+              } else {
+                // Poor performance: 0-40 points
+                normalizedScore = Math.max(0, Math.round(40 - (maxRT - 2000) / 1000 * 10));
+              }
+              
+              // Ensure score is within 0-100 range
+              normalizedScore = Math.max(0, Math.min(100, normalizedScore));
+              
+              // console.log("Calculated score:", normalizedScore, "from RT:", maxRT);
+              
+              comment=`${RTfour}-${RTeight}-${RTsixteen}-${RTthirtytwo}-${RTfour1}-${RTeight1}-${RTsixteen1}-${RTthirtytwo1}`;
+              console.log(comment);
+              sendScore(normalizedScore,comment);
 
               psy_add_text_rgb_db(
                 0,

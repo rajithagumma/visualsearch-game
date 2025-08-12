@@ -15,32 +15,12 @@
         background-color: #222;
         flex-direction: column;
       }
-      #startbutton {
-        background-color: white;
-        /* color: white; */
-        padding: 10px 20px;
-        font-size: 20px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        margin-top: 20px;
-        font-weight: bold;
-      }
     </style>
   </head>
   <body onload="whenloaded()">
     <script>
       function whenloaded() {
-        // var xxx;
-        // xxx = document.getElementById("startbutton");
-        // xxx.textContent =
-        //   "Click this button to start the experiment in the black box above this button";
-        // xxx.disabled = false;
-        // var tmpimg;
-        // tmpimg = document.getElementById("experimentloadingimg");
-        // tmpimg.parentNode.removeChild(tmpimg);
         main();
-
       }
     </script>
     <center>
@@ -69,29 +49,15 @@
         ></canvas>
       </div>
     </center>
-    <!-- <br /><button
-      id="startbutton"
-      disabled="true"
-      onClick="startbutton.disabled=true;main();return(false);"
-    >
-      Experiment loading in progress, please be patient and wait...</button
-    ><img
-      id="experimentloadingimg"
-      src="http://psytoolkit.gla.ac.uk/loading.gif"
-    /><br /> -->
     <script>
-      async function sendScore(score,comment) {
+      async function sendScore(score, comment) {
         try {
           const ltik = new URLSearchParams(window.location.search).get("ltik");
           if (!ltik) throw new Error("LTIK token missing from URL");
-
-          // Ensure score is a valid number between 0 and 100
           const numericScore = Number(score);
           if (isNaN(numericScore)) {
             throw new Error("Score must be a valid number");
           }
-          
-          // Clamp score between 0 and 100
           const clampedScore = Math.max(0, Math.min(100, numericScore));
 
           console.log("Sending score:", clampedScore, "with LTIK:", ltik);
@@ -101,7 +67,7 @@
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ grade: clampedScore,comment }),
+            body: JSON.stringify({ grade: clampedScore, comment }),
           });
 
           console.log("Response status:", response.status);
@@ -109,7 +75,9 @@
           if (!response.ok) {
             const errorText = await response.text();
             console.error("Server error response:", errorText);
-            throw new Error(`Network response was not ok: ${response.status} - ${errorText}`);
+            throw new Error(
+              `Network response was not ok: ${response.status} - ${errorText}`
+            );
           }
 
           const data = await response.json();
@@ -140,7 +108,7 @@
         psy_exp_start_time = 0,
         psy_exp_current_time = 0,
         tablerow = 0;
-        practice_instruction=0;
+      practice_instruction = 0;
       const BASE_WIDTH = 800;
       const BASE_HEIGHT = 600;
 
@@ -187,7 +155,7 @@
         img.onload = function () {
           psy_bitmaps[bmp_number] = img;
           bmp_number++;
-          if (callback) callback(); // Signal that this image is loaded
+          if (callback) callback(); 
         };
         img.src = src;
       }
@@ -229,11 +197,10 @@
       function psy_keyboard(a, b, d, f) {
         possiblekeys = a;
 
-        // Set expectedkey only if there's a single key
         if (possiblekeys.length === 1) {
           psy_readkey.expectedkey = possiblekeys[0];
         } else {
-          psy_readkey.expectedkey = null; // means multiple keys expected
+          psy_readkey.expectedkey = null; 
         }
         psy_readkey.start(current_task, f);
       }
@@ -298,9 +265,7 @@
         inkeypress++;
 
         if (psy_readkey.expectkey && inkeypress === 1) {
-          if (
-            current_block !== "block_block1" && practice_instruction==1
-          ) {
+          if (current_block !== "block_block1" && practice_instruction == 1) {
             if (a.keyCode === 32) {
               keystatus.time = new Date().getTime() - psy_readkey.starttime;
               keystatus.key = a.keyCode;
@@ -311,7 +276,8 @@
               inkeypress--;
             }
           } else if (
-            current_block === "block_block1" || current_block==="block_practice_trials"
+            current_block === "block_block1" ||
+            current_block === "block_practice_trials"
           ) {
             if (a.keyCode === 89 || a.keyCode === 78) {
               keystatus.time = new Date().getTime() - psy_readkey.starttime;
@@ -321,7 +287,7 @@
               psy_readkey.stop();
             } else {
               inkeypress--;
-              // so key is still expected
+              
             }
           }
         }
@@ -641,8 +607,17 @@
           psy_screen_height / BASE_HEIGHT
         );
         const bmp = psy_bitmaps[a - 1];
-        const scaledWidth = bmp.width * scale;
-        const scaledHeight = bmp.height * scale;
+
+        let scaledWidth, scaledHeight;
+
+        if (a == 1) {
+          scaledWidth = bmp.width;
+          scaledHeight = bmp.height;
+        } else {
+          scaledWidth = bmp.width * scale;
+          scaledHeight = bmp.height * scale;
+        }
+        console.log(bmp.width, bmp.height);
         let x =
           b === PSY_CENTRAL
             ? psy_screen_center_x - scaledWidth / 2
@@ -655,19 +630,10 @@
         psy_stimuli1[psy_stimuli1_end].type = 1;
         psy_stimuli1[psy_stimuli1_end].on = 1;
         psy_stimuli1[psy_stimuli1_end].bitmap = a;
-        if (a == 1) {
-          const newwidth = scaledWidth - 80;
-          const newX = x + 40;
-          psy_stimuli1[psy_stimuli1_end].rect.x = newX;
-          psy_stimuli1[psy_stimuli1_end].rect.y = y;
-          psy_stimuli1[psy_stimuli1_end].rect.width = newwidth;
-          psy_stimuli1[psy_stimuli1_end].rect.height = scaledHeight;
-        } else {
-          psy_stimuli1[psy_stimuli1_end].rect.x = x;
-          psy_stimuli1[psy_stimuli1_end].rect.y = y;
-          psy_stimuli1[psy_stimuli1_end].rect.width = scaledWidth;
-          psy_stimuli1[psy_stimuli1_end].rect.height = scaledHeight;
-        }
+        psy_stimuli1[psy_stimuli1_end].rect.x = x;
+        psy_stimuli1[psy_stimuli1_end].rect.y = y;
+        psy_stimuli1[psy_stimuli1_end].rect.width = scaledWidth;
+        psy_stimuli1[psy_stimuli1_end].rect.height = scaledHeight;
 
         psy_stimuli1_n++;
         psy_stimuli1_end++;
@@ -847,8 +813,8 @@
         tryagain = 13,
         practice = 14,
         completion = 15,
-        presentmessage=16,
-        absentmessage=17,
+        presentmessage = 16,
+        absentmessage = 17,
         arial = 0,
         x = 0,
         RTfive = 0,
@@ -951,9 +917,9 @@
                 psy_add_centered_bitmap_db(fixpoint, PSY_CENTRAL, PSY_CENTRAL);
                 psy_draw_all_db();
                 psy_delay(100);
-               
+
                 break;
-                
+
               case 2:
                 task_search.step++;
                 psy_clear_stimuli1(1);
@@ -961,17 +927,16 @@
                 psy_delay(400);
                 break;
               case 3:
-                 if (current_block==="block_practice_trials"){
-                  if (general[tablerow].c2===1){
-                    psy_add_centered_bitmap_db(presentmessage,0,-230);
+                if (current_block === "block_practice_trials") {
+                  if (general[tablerow].c2 === 1) {
+                    psy_add_centered_bitmap_db(presentmessage, 0, -230);
                     psy_add_centered_bitmap_db(
-                  frame,
-                  general[tablerow].c5,
-                  general[tablerow].c6
-                );
-                  }
-                  else{
-                    psy_add_centered_bitmap_db(absentmessage,0,-230);
+                      frame,
+                      general[tablerow].c5,
+                      general[tablerow].c6
+                    );
+                  } else {
+                    psy_add_centered_bitmap_db(absentmessage, 0, -230);
                   }
                 }
                 task_search.step++;
@@ -1135,10 +1100,20 @@
                   general[tablerow].c98,
                   general[tablerow].c99
                 );
+                if (current_block === "block_practice_trials") {
+                  if (general[tablerow].c2 === 1) {
+                    psy_add_centered_bitmap_db(
+                      frame,
+                      general[tablerow].c5,
+                      general[tablerow].c6
+                    );
+                    psy_add_centered_bitmap_db(target,general[tablerow].c5,general[tablerow].c6);
+                  }
+                }
                 psy_draw_all_db();
-                if (current_block==="block_practice_trials"){
-                  psy_wait_keylist(0,[89, 78],99999999);
-                }else{
+                if (current_block === "block_practice_trials") {
+                  psy_wait_keylist(0, [89, 78], 99999999);
+                } else {
                   psy_wait_keylist(0, [89, 78], 4000);
                 }
                 break;
@@ -1169,23 +1144,24 @@
               case 6:
                 task_search.step++;
                 if (current_block === "block_practice_trials") {
-                  psy_add_centered_bitmap_db(tryagain, 0, 220);
+                  psy_add_centered_bitmap_db(tryagain, 0, 200);
                   task_search.practice_count--;
                   block_practice_trials.trial_counter--;
                 } else {
-                  psy_add_centered_bitmap_db(therewasnone, 0, 220);
+                  psy_add_centered_bitmap_db(therewasnone, 0, 200);
                 }
                 psy_draw_all_db();
                 psy_delay(2e3);
                 break;
               case 7:
                 task_search.step++;
-                // psy_clear_stimuli1(34);
                 psy_draw_all_db();
                 psy_delay(500);
-                if (current_block === "block_practice_trials"){
+                if (current_block === "block_practice_trials") {
                   psy_clear_stimuli1(2);
                   psy_clear_stimuli1(35);
+                } else {
+                  psy_clear_stimuli1(34);
                 }
                 break;
               case 8:
@@ -1288,14 +1264,13 @@
                 break;
               case 15:
                 task_search.step++;
-                psy_clear_stimuli1(35);
                 psy_draw_all_db();
                 psy_delay(500);
-                if (current_block==="block_practice_trials"){
+                if (current_block === "block_practice_trials") {
                   psy_clear_stimuli1(2);
-                  psy_clear_stimuli1(36);
-                }else{
-                    psy_clear_stimuli1(34);
+                  psy_clear_stimuli1(38);
+                } else {
+                  psy_clear_stimuli1(34);
                 }
                 break;
               case 16:
@@ -1350,6 +1325,7 @@
                 psy_clear_stimuli1(36);
                 psy_clear_stimuli1(37);
                 psy_clear_stimuli1(38);
+                psy_clear_stimuli1(39);
                 psy_draw_all_db();
                 x = 1;
                 task_search.run();
@@ -1369,14 +1345,13 @@
                     psy_draw_all_db();
                     psy_delay(2e3);
                     psy_clear_stimuli1(2);
-                    if (general[tablerow].c2 == 1){
-                      psy_clear_stimuli1(36);
-
-                    }else{
+                    if (general[tablerow].c2 == 1) {
+                      psy_clear_stimuli1(38);
+                    } else {
                       psy_clear_stimuli1(35);
                     }
                     break;
-                  } 
+                  }
                 }
                 0 != x && (task_search.step = 24);
                 eval("task_search.run()");
@@ -1431,6 +1406,8 @@
                 psy_clear_stimuli1(33);
                 psy_clear_stimuli1(34);
                 psy_clear_stimuli1(35);
+                psy_clear_stimuli1(36);
+                psy_clear_stimuli1(37);
                 psy_draw_all_db();
                 task_search.run();
                 break;
@@ -1473,13 +1450,23 @@
             switch (block_messagenumber1.step) {
               case 1:
                 block_messagenumber1.step++;
-                practice_instruction=1;
+                practice_instruction = 1;
                 psy_wait(aims, 32);
                 break;
               case 2:
                 if (keystatus.status === 1) {
                   block_messagenumber1.step++;
-                  practice_instruction=0;
+                  practice_instruction = 0;
+                  const canvas = document.getElementById("exp");
+                  if (canvas.requestFullscreen) {
+                    canvas.requestFullscreen();
+                  } else if (canvas.mozRequestFullScreen) {
+                    canvas.mozRequestFullScreen();
+                  } else if (canvas.webkitRequestFullscreen) {
+                    canvas.webkitRequestFullscreen();
+                  } else if (canvas.msRequestFullscreen) {
+                    canvas.msRequestFullscreen();
+                  }
                   eval("blocks.run()");
                 } else {
                   block_messagenumber1.step = 1;
@@ -1494,7 +1481,7 @@
           trial_counter: 1,
           start: function () {
             block_practice_trials.step = 1;
-            counter=1;
+            counter = 1;
             current_task = "block_practice_trials";
             psy_clear_stimulus_counters_db();
             block_practice_trials.run();
@@ -1504,29 +1491,28 @@
             switch (block_practice_trials.step) {
               case 1: // Show intro image for 4 seconds
                 block_practice_trials.step++;
-                practice_instruction=1;
-                psy_wait(practice,32);
+                practice_instruction = 1;
+                psy_wait(practice, 32);
                 break;
               case 2:
-                if (keystatus.status === 1 && counter==1 ) {
+                if (keystatus.status === 1 && counter == 1) {
                   block_practice_trials.step++;
-                  practice_instruction=0;
+                  practice_instruction = 0;
                   psy_clear_screen_db();
                   task_search.start(PRACTICE_TRIALS);
-                  counter++
-                } else if (counter!=1){
+                  counter++;
+                } else if (counter != 1) {
                   psy_clear_screen_db();
                   task_search.start(PRACTICE_TRIALS);
                   block_practice_trials.step++;
-                }
-                else {
+                } else {
                   block_practice_trials.step = 1;
                 }
                 break;
 
               case 3: // Repeat for 4 practice trials
                 console.log(block_practice_trials.step);
-                if (block_practice_trials.trial_counter <4) {
+                if (block_practice_trials.trial_counter < 4) {
                   block_practice_trials.trial_counter++;
                   block_practice_trials.step = 2;
                   block_practice_trials.run();
@@ -1538,17 +1524,16 @@
 
               case 4: // Show end image for 4 seconds
                 block_practice_trials.step++;
-                practice_instruction=1;
-                psy_wait(completion,32);
+                practice_instruction = 1;
+                psy_wait(completion, 32);
                 break;
 
               case 5: // Proceed to actual test block
-                if (keystatus.status===1){
-                    block_practice_trials.step++;
-                    eval("blocks.run()");
-                }
-                else{
-                  block_practice_trials.step=4;
+                if (keystatus.status === 1) {
+                  block_practice_trials.step++;
+                  eval("blocks.run()");
+                } else {
+                  block_practice_trials.step = 4;
                   block_practice_trials.run();
                 }
                 break;
@@ -1730,32 +1715,35 @@
               var a321 = a1;
               const maxRT = Math.max(RTfour, RTeight);
               let normalizedScore;
-              
+
               if (maxRT <= 0) {
                 // No valid reaction time recorded
                 normalizedScore = 0;
               } else if (maxRT <= 500) {
                 // Excellent performance: 90-100 points
-                normalizedScore = Math.round(90 + (500 - maxRT) / 500 * 10);
+                normalizedScore = Math.round(90 + ((500 - maxRT) / 500) * 10);
               } else if (maxRT <= 1000) {
-                // Good performance: 70-90 points  
-                normalizedScore = Math.round(70 + (1000 - maxRT) / 500 * 20);
+                // Good performance: 70-90 points
+                normalizedScore = Math.round(70 + ((1000 - maxRT) / 500) * 20);
               } else if (maxRT <= 2000) {
                 // Average performance: 40-70 points
-                normalizedScore = Math.round(40 + (2000 - maxRT) / 1000 * 30);
+                normalizedScore = Math.round(40 + ((2000 - maxRT) / 1000) * 30);
               } else {
                 // Poor performance: 0-40 points
-                normalizedScore = Math.max(0, Math.round(40 - (maxRT - 2000) / 1000 * 10));
+                normalizedScore = Math.max(
+                  0,
+                  Math.round(40 - ((maxRT - 2000) / 1000) * 10)
+                );
               }
-              
+
               // Ensure score is within 0-100 range
               normalizedScore = Math.max(0, Math.min(100, normalizedScore));
-              
+
               // console.log("Calculated score:", normalizedScore, "from RT:", maxRT);
-              
-              comment=`${RTfour}-${RTeight}-${RTsixteen}-${RTthirtytwo}-${RTfour1}-${RTeight1}-${RTsixteen1}-${RTthirtytwo1}`;
+
+              comment = `${RTfour}-${RTeight}-${RTsixteen}-${RTthirtytwo}-${RTfour1}-${RTeight1}-${RTsixteen1}-${RTthirtytwo1}`;
               console.log(comment);
-              sendScore(normalizedScore,comment);
+              sendScore(normalizedScore, comment);
 
               psy_add_text_rgb_db(
                 0,
@@ -1917,6 +1905,7 @@
       };
       let experimentFinished = false;
       document.addEventListener("fullscreenchange", () => {
+        consloe.log("fullscreen changed");
         if (!document.fullscreenElement) {
           if (!experimentstarted) {
             // Experiment NOT started: force fullscreen again
@@ -1975,17 +1964,6 @@
         psy_exp_start_time = psy_exp_current_time = new Date().getTime();
         psy_mouse_visibility(0);
         psy_load_font("Arial", 20);
-        const canvas = document.getElementById("exp");
-        if (canvas.requestFullscreen) {
-          canvas.requestFullscreen();
-        } else if (canvas.mozRequestFullScreen) {
-          canvas.mozRequestFullScreen();
-        } else if (canvas.webkitRequestFullscreen) {
-          canvas.webkitRequestFullscreen();
-        } else if (canvas.msRequestFullscreen) {
-          canvas.msRequestFullscreen();
-        }
-
         fetch("bitmaps.json")
           .then((response) => response.json())
           .then((data) => {
